@@ -1,32 +1,20 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-const instance = axios.create({
-  baseURL: "http://localhost:5000",
-  timeout: 5000,
-  headers: { "X-Custom-Header": "foobar" },
-});
+import Login from './Login';
+import { Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
+import Home from './Home';
 function App() {
- const [data, setData] = useState('');
+  const [token, setToken] = useState(localStorage.getItem('userToken'));
 
-  useEffect(() => {
-    // Making a GET request to the Express backend
-    instance.get('/api/message')
-      .then(response => {
-        console.log(response.data);
-        setData(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error fetching the data!", error);
-      });
-  }, []);
+  const handleLogin = (newToken) => {
+    localStorage.setItem('userToken', newToken);
+    setToken(newToken);
+  };
 
-   return (
-  <div className="App">
-    <h1>Backend Response:</h1>
-    {/* If data is empty, it shows "No data yet" instead of just "Loading" */}
-    <p>{data || "Loading or empty response..."}</p>
-  </div>
+  return (
+    <Routes>
+      <Route path="/login" element={<Login onLogin={handleLogin} />} />
+      <Route path="/home" element={<Home />} />
+    </Routes>
 );
 }
-
 export default App;

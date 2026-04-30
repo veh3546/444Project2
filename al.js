@@ -1,13 +1,16 @@
 const express = require('express');
 const path = require('path');
-const cors = require('cors');
 const app = express();
 const port = 5000;
 
 // ********************* MIDDLEWARE *************************
 
-app.use(cors());
+const cors = require('cors');
 
+app.use(cors({
+  origin: 'http://localhost:3000', // Replace with your frontend URL
+  credentials: true
+}));
 // Middleware to parse JSON bodies
 app.use(express.json());
 
@@ -170,7 +173,7 @@ app.get('/userLoaned', (req, res) => {
  * @param username - the username of the user
  * @param password - the password of the user
  */
-app.get('/login', (req, res) => {
+app.post('/login', (req, res) => {
     // Gets the userID, -1 if undefined
     const username = req.query.username != undefined ? req.query.username : null;
     const password = req.query.password != undefined ? req.query.password : null;
