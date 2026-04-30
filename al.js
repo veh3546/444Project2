@@ -1,14 +1,22 @@
 const express = require('express');
+const path = require('path');
+const cors = require('cors');
 const app = express();
-const port = 3000;
+const port = 5000;
 
 // ********************* MIDDLEWARE *************************
+
+app.use(cors());
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+
 // ************************** GET *************************
-app.get('/', (req, res) => {
+app.get('/api/message', (req, res) => {
   res.send('Hello World!');
 });
 
@@ -26,7 +34,6 @@ app.get('/book', (req, res) => {
     // console.log(bookID);
 
     //TODO: check if valid data Type
-    
     //if valid data type, attempt to get book from DB
     //const Book = db.getBook(bookID);
 
@@ -44,9 +51,6 @@ app.get('/book', (req, res) => {
 
     //on success
     res.status(200).json({ Book });
-
-    // on failure
-    res.status(400).json({"error": "Invalid Params"});
 });
 
 
@@ -304,7 +308,7 @@ app.put('/loanBook', (req, res) => {
 
     //TODO: check if valid bookID
     //const is_loaned = db.validBook(bookID) ( )
-    const is_loaned; //TEMP
+    var is_loaned; //TEMP
     
     //If invalid book
     if(is_loaned == null){
@@ -340,7 +344,7 @@ app.put('/loanBook', (req, res) => {
  * 
  * @param bookID = the books id
  */
-app.get('/book', (req, res) => {
+app.delete('/book', (req, res) => {
     // Gets the id or -1 if invalid
     const bookID = req.query.bookID != undefined ? req.query.bookID: -1;
     // console.log(bookID);
@@ -362,5 +366,5 @@ app.get('/book', (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
