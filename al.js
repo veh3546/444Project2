@@ -1,4 +1,5 @@
 const express = require('express');
+const db = require('./db');
 const app = express();
 const port = 3000;
 
@@ -28,19 +29,21 @@ app.get('/book', (req, res) => {
     //TODO: check if valid data Type
     
     //if valid data type, attempt to get book from DB
-    //const Book = db.getBook(bookID);
+    const Book = db.getBook(bookID);
 
     //SAMPLE UNTIL DB IMPLEMENTED
-    const Book = {
-        "bookID" : 1,
-        "title" : "The Odyssey",
-        "author" : "Homer",
-        "description" : "This sample description might be 2 sentances",
-        "genre" : "Epic",
-        "year_published" : 800,
-        "publisher" : "Greeks",
-        "is_loaned" : false
-    }
+    // const Book = {
+    //     "bookID" : 1,
+    //     "title" : "The Odyssey",
+    //     "author" : "Homer",
+    //     "description" : "This sample description might be 2 sentances",
+    //     "genre" : "Epic",
+    //     "year_published" : 800,
+    //     "publisher" : "Greeks",
+    //     "is_loaned" : false
+    // }
+
+    console.log(Book);
 
     //on success
     res.status(200).json({ Book });
@@ -304,7 +307,7 @@ app.put('/loanBook', (req, res) => {
 
     //TODO: check if valid bookID
     //const is_loaned = db.validBook(bookID) ( )
-    const is_loaned; //TEMP
+    const is_loaned = null; //TEMP
     
     //If invalid book
     if(is_loaned == null){
