@@ -1,5 +1,6 @@
-const express = require('express');
-const db = require('./db');
+import express from 'express';
+import *  as db from './db.js';
+import * as bus from './bus.js';
 const app = express();
 const port = 3000;
 
@@ -9,7 +10,7 @@ const port = 3000;
 app.use(express.json());
 
 // ************************** GET *************************
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   res.send('Hello World!');
 });
 
@@ -21,35 +22,28 @@ app.get('/', (req, res) => {
  * 
  * @param bookID - the bookId
  */
-app.get('/book', (req, res) => {
+app.get('/book', async (req, res) => {
     // Gets the id or -1 if invalid
     const bookID = req.query.bookID != undefined ? req.query.bookID: -1;
-    // console.log(bookID);
+    console.log(bookID);
 
     //TODO: check if valid data Type
-    
+    if(bookID == -1 || bus.isNum(bookID) != true){
+        res.status(400).json({"error": "Invalid Params"});
+        return;
+    }
     //if valid data type, attempt to get book from DB
-    const Book = db.getBook(bookID);
+    try {
+        const Book = await db.getBookById(bookID);
+        // console.log(Book);
 
-    //SAMPLE UNTIL DB IMPLEMENTED
-    // const Book = {
-    //     "bookID" : 1,
-    //     "title" : "The Odyssey",
-    //     "author" : "Homer",
-    //     "description" : "This sample description might be 2 sentances",
-    //     "genre" : "Epic",
-    //     "year_published" : 800,
-    //     "publisher" : "Greeks",
-    //     "is_loaned" : false
-    // }
+        //on success
+        res.status(200).json({ Book });       
+    } catch (error) {
 
-    console.log(Book);
-
-    //on success
-    res.status(200).json({ Book });
-
-    // on failure
-    res.status(400).json({"error": "Invalid Params"});
+        // on failure
+        res.status(500).json({"error": "Unexpected server error"});
+    }
 });
 
 
@@ -60,21 +54,33 @@ app.get('/book', (req, res) => {
  * 
  * @param genre - the genre of the book
  */
-app.get('/genre', (req, res) => {
+app.get('/genre', async (req, res) => {
     // Gets the 
     const genre = req.query.genre != undefined ? req.query.genre : null;
     // console.log(genre);
 
     //TODO: check if valid data Type (string)
-    
-    //if valid data type, attempt to get all book with given genre from DB
-    //const genreBooks = db.getGenre(genre);
+    if(genre == null || bus.isString(genre) != true){
+        res.status(400).json({"error": "Invalid Params"});
+        return;
+    }
+    //if valid data type, attempt to get book from DB
+    try {
+        const genreBooks = await db.getBooksByGenre(genre);
+        console.log(genreBooks);
 
-    //on success
-    // res.status(200).json({ genreBooks });
+        //if no books in genre
+        if(genreBooks.length == 0){
+            res.status(200).json({"warning": "No books in given genre"});
+            return
+        }
 
-    // on failure
-    // res.status(400).json({"error": "Invalid Params"});
+        //on success
+        res.status(200).json({ genreBooks });       
+    } catch (error) {
+        // on failure
+        res.status(500).json({"error": "Unexpected server error"});
+    }
 });
 
 
@@ -84,15 +90,24 @@ app.get('/genre', (req, res) => {
  * EX. http://localhost:3000/loaned
  * 
  */
-app.get('/loaned', (req, res) => {
+app.get('/loaned', async (req, res) => {
     //Return all the loaned books
-    //const loanedBooks = db.getLoanedBooks();
-
-    //on success
-    // res.status(200).json({ loanedBooks });
-
+    try {
+        const loanedBooks = await db.getLoanedBooks();
+        
+        //if no loaned books
+        if(loanedBooks.length == 0){
+            res.status(200).json({"warning": "No books are loaned right now"});
+            return
+        }
+        else{
+        // on success
+        res.status(200).json({ loanedBooks });
+        }
+    } catch (error) {
     // on failure
-    // res.status(500).json({"error": "An unexpected error occured});
+        res.status(500).json({"error": "An unexpected error occured"});
+    }
 });
 
 /**
@@ -101,15 +116,24 @@ app.get('/loaned', (req, res) => {
  * EX. http://localhost:3000/free
  * 
  */
-app.get('/free', (req, res) => {
-    //Return all the free books
-    //const freeBooks = db.getFreeBooks();
-
-    //on success
-    // res.status(200).json({ freeBooks });
-
+app.get('/free', async (req, res) => {
+   //Return all the loaned books
+    try {
+        const loanedBooks = await db.getFreeBooks();
+        
+        //if no loaned books
+        if(loanedBooks.length == 0){
+            res.status(200).json({"warning": "No books are availible right now"});
+            return
+        }
+        else{
+        // on success
+        res.status(200).json({ loanedBooks });
+        }
+    } catch (error) {
     // on failure
-    // res.status(500).json({"error": "An unexpected error occured});
+        res.status(500).json({"error": "An unexpected error occured"});
+    }
 });
 
 /**
@@ -118,46 +142,62 @@ app.get('/free', (req, res) => {
  * EX. http://localhost:3000/allBooks
  * 
  */
-app.get('/allBooks', (req, res) => {
-    //Return all the books
-    //const allBooks = db.getAllBooks();
-
-    //on success
-    // res.status(200).json({ allBooks });
-
+app.get('/allBooks', async (req, res) => {
+   //Return all the loaned books
+    try {
+        const allBooks = await db.getAllBooks();
+        
+        //if no books
+        if(allBooks.length == 0){
+            res.status(200).json({"warning": "No books are in the library right now"});
+            return
+        }
+        else{
+        // on success
+        res.status(200).json({ allBooks });
+        }
+    } catch (error) {
     // on failure
-    // res.status(500).json({"error": "An unexpected error occured});
+        res.status(500).json({"error": "An unexpected error occured"});
+    }
 });
 
 
 /**
  * The get method to return all books loaned by a given user
  * 
- * EX. http://localhost:3000/genre?genre='Epic'
+ * EX. http://localhost:3000/userLoaned?userID='1'
  * 
- * @param genre - the genre of the book
+ * @param userID - the users userID
  */
-app.get('/userLoaned', (req, res) => {
+app.get('/userLoaned', async (req, res) => {
     // Gets the userID, -1 if undefined
     const userID = req.query.userID != undefined ? req.query.userID : -1;
     // console.log(userID);
 
     //TODO: check if valid data Type (int)
+    if(userID == -1 || bus.isNum(userID) != true){
+        res.status(400).json({"error": "Invalid Params"});
+        return;
+    }
     
     //if valid data type, attempt to get all book loaned from given user
-    //const allInfo = db.getBooksAndLoanedInfo(userID);
+    try {
+        const userBooks = await db.getBooksByUser(userID);
+                
+        //if no loaned books
+        if(userBooks.length == 0){
+            res.status(200).json({"warning": "User has no books currently loaned"});
+            return
+        }
 
-    // OR
-
-    //const booksInfo = db.getBooksLoaned(userID)
-    //const loansInfo = db.getLoansInfo(userID)
-    //combine jsons and send out
-
-    //on success
-    // res.status(200).json({ genreBooks });
-
-    // on failure
-    // res.status(400).json({"error": "Invalid Params"});
+        //on success
+        res.status(200).json({ userBooks });
+    } catch (error) {
+        
+        // on failure
+        res.status(400).json({"error": "Invalid Params"});
+    }
 });
 
 
@@ -169,43 +209,51 @@ app.get('/userLoaned', (req, res) => {
  * @param username - the username of the user
  * @param password - the password of the user
  */
-app.get('/login', (req, res) => {
+app.get('/login', async (req, res) => {
     // Gets the userID, -1 if undefined
     const username = req.query.username != undefined ? req.query.username : null;
     const password = req.query.password != undefined ? req.query.password : null;
-    // console.log(useranem, password);
+    // console.log(username, password);
 
     //TODO: check if valid data Type (string)
+    if(username == null || bus.isString(username) != true || password == null || bus.isString(password) != true){
+        res.status(400).json({"error": "Invalid Params"});
+        return;
+    }
     
-    //if valid data type, attempt to login
 
     //hash password
+    const hashPass = bus.hash(password);
     //TODO: hash password
+    
+    try {
+        //if valid data type, attempt to login
+        const loginInfo = await db.login(username, hashPass); 
+        console.log(loginInfo)
 
-    //const validLoginID = db.login(username, password); (want userID returned from this)
-    const validLoginID = 0; //TEMP
+        //on success
+        if (loginInfo.length != 0){
 
-    //on success
-    if (validLoginID != -1){
+            //create sessionTOken
+            //TODO: create JWT token
 
-        //create sessionTOken
+            //insert into db
+            //db.updateSessiontoken(sessionToken, userID);
 
-        //TODO: create JWT token
+            //set token in localstorage?
+            //TODO put sessionToken somewhere to recall
 
-        //insert into db
-        //db.updateSessiontoken(sessionToken, userID);
+            //redirect to new page
+            res.status(200).json({ "success": "User succesffuly logged in" });
 
-        //set token in localstorage?
-        //TODO put sessionToken somewhere to recall
-
-        //redirect to new page
-        // res.status(200).json({ genreBooks });
-
-    }
-    else{
-        // on failure
-        // res.status(400).json({"error": "Invalid Login"});
-    }
+        }
+        else{
+            // on failure
+            res.status(400).json({"error": "Invalid Login"});
+        }
+    } catch (error) {
+        res.status(500).json({"error": "Unexpected error"});
+    } 
 });
 
 
@@ -226,22 +274,54 @@ app.get('/login', (req, res) => {
     }
  * 
  */
-app.post('/add', (req, res) => {
+app.post('/add', async (req, res) => {
 
     // Gets the params
     const { title, author, description, genre, year_published, publisher } = req.body
     // console.log(userID);
 
     //TODO: check if valid data Types (int)
-    
-    //if all valid data types, attempt to get all book loaned from given user
-    //const bookID = db.insertBook(title, author, description, genre, year_published, publisher);
+    try {
+        //title & author
+        if(bus.isString(title) != true || bus.isString(author) != true){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+        //description & genre
+        if(bus.isString(author) != true || bus.isString(genre) != true){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+        //year_published & publisher
+        if(bus.isNum(year_published) != true || bus.isString(publisher) != true){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+    } catch (error) {
+        res.status(400).json({"error": "Invalid Params"});
+        return;
+    }
 
-    //on success
-    // res.status(200).json({ bookID });
+    //if all valid data types, attempt to insert new book
+    const book = {
+        "title" : title,
+        "author" : author,
+        "description" : description,
+        "genre" : genre,
+        "year_published" : year_published,
+        "publisher" : publisher
+    }
+    try {
+        //attempt to insert into DB
+        const bookID = await db.insertBook(book);
 
-    // on failure
-    // res.status(400).json({"error": "Invalid Params"});
+        //on success
+        res.status(200).json({ "success": "Book added succesffuly" });
+
+    } catch (error) {
+        // on failure
+        res.status(500).json({"error": "An unexpected error occured"});
+    }
 });
 
 // ************************* PUT **********************
@@ -263,24 +343,58 @@ app.post('/add', (req, res) => {
     }
  * 
  */
-app.put('/updateBook', (req, res) => {
+app.put('/updateBook', async (req, res) => {
 
     // Gets the params
     const { bookID, title, author, description, genre, year_published, publisher } = req.body
     // console.log(userID);
 
-    //TODO: check if valid data Types
+    try {
+        //title & author
+        if(bus.isString(title) != true || bus.isString(author) != true){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+        //description & genre
+        if(bus.isString(author) != true || bus.isString(genre) != true){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+        //year_published & publisher & bookID
+        if(bus.isNum(year_published) != true || bus.isString(publisher) != true || bus.isNum(bookID) != true){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+    } catch (error) {
+        res.status(400).json({"error": "Invalid Params"});
+        return;
+    }
 
-    //TODO: check if valid bookID
-    
-    //if all valid data types, attempt to update book with new book object
-    //const bookID = db.updateBook(bookID, title, author, description, genre, year_published, publisher);
+    //if all valid data types, attempt to insert new book
+    const book = {
+        "title" : title,
+        "author" : author,
+        "description" : description,
+        "genre" : genre,
+        "year_published" : year_published,
+        "publisher" : publisher
+    }
+    try {
+        //attempt to update DB
+        const affectedRows = await db.updateBook(bookID,book);
+        
+        if(affectedRows == 0){
+            res.status(200).json({"warning": "No books were updated"});
+            return
+        }
 
-    //on success
-    // res.status(200).json({ bookID });
+        //on success
+        res.status(200).json({ "success": "Book updated succesffuly" });
 
-    // on failure
-    // res.status(400).json({"error": "Invalid Params"});
+    } catch (error) {
+        // on failure
+        res.status(500).json({"error": "An unexpected error occured"});
+    }
 });
 
 
@@ -295,40 +409,62 @@ app.put('/updateBook', (req, res) => {
  *  'dateParam' : '2026-05-15'
  * }
  */
-app.put('/loanBook', (req, res) => {
+app.put('/loanBook', async (req, res) => {
 
     // Gets the params
  const { bookID, userID, dateParam } = req.body
     // console.log(booID, dateParam);
 
     //TODO: check if valid data Types
-
-    //TODO: check if valid userID
-
-    //TODO: check if valid bookID
-    //const is_loaned = db.validBook(bookID) ( )
-    const is_loaned = null; //TEMP
-    
-    //If invalid book
-    if(is_loaned == null){
+    //year_published & publisher & bookID
+    try {
+        if(bus.isNum(bookID) != true || bus.isNum(userID) != true || bus.isValidDate(dateParam) != true){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+    } catch (error) {
         res.status(400).json({"error": "Invalid Params"});
+        return;
     }
 
-    //if all valid data types and loan is false, update is_loaned status and create new loan objectx
-    if (is_loaned == false){
-         //db.updateBookLoan(bookID, true);
-        //db.insertLoan(bookID, userID, dateParam);
+    try {
+        //TODO: check if valid userID
+        const isValidUser = await db.validUser(userID);
+        if(!isValidUser){
+            res.status(400).json({"error": "Invalid Params"});
+        }
 
-        // on success
-        res.status(200).json({ 'message': 'Book succesffuly loaned '});
-    }
-    else{
-        //db.updateBookLoan(bookID, false);
-        //db.updateLoan(bookID, userID, dateParam);
+        //TODO: check if valid bookID
+        const is_loaned = await db.validBook(bookID);
+        console.log(is_loaned);
 
-           
-        //on success
-        res.status(200).json({ 'message': 'Book succesffuly returned '});
+        //If invalid book
+        if(is_loaned.length == 0){
+            res.status(400).json({"error": "Invalid Params"});
+            return;
+        }
+
+        //if all valid data types and loan is false, update is_loaned status and create new loan objectx
+        console.log(is_loaned[0]['is_loaned']);
+        if (is_loaned[0]['is_loaned'] == 0){
+            //update loan
+            await db.updateBookLoan(bookID, 1);
+            await db.addLoan(bookID, userID, dateParam);
+
+            // on success
+            res.status(200).json({ 'message': 'Book succesffuly loaned '});
+        }
+        else{
+            await db.updateBookLoan(bookID, 0);
+            await db.deleteLoan(bookID);
+
+            //on success
+            res.status(200).json({ 'message': 'Book succesffuly returned '});
+        }
+    } 
+    catch (error) {
+        console.log(error);
+        res.status(500).json({"error": "Unexpected error occured", "e": error});
     }
 
 
@@ -339,27 +475,39 @@ app.put('/loanBook', (req, res) => {
 /**
  * The delete method for getting rid of a book
  * 
- * EX. http://localhost:3000/loanBook?bookID='1'
+ * EX. http://localhost:3000/deleteBook?bookID='1'
  * 
  * @param bookID = the books id
  */
-app.get('/book', (req, res) => {
+app.delete('/deleteBook', async (req, res) => {
     // Gets the id or -1 if invalid
     const bookID = req.query.bookID != undefined ? req.query.bookID: -1;
     // console.log(bookID);
 
     //TODO: check if valid data Type
+    if(bookID == -1 || bus.isNum(bookID) != true){
+        res.status(400).json({"error": "Invalid Params"});
+        return;
+    }
+    //if valid data type, attempt to get book from DB
+    try {
+        //get rid of loans using book
+        await db.deleteLoan(bookID);
+        const affectedRows = await db.deleteBook(bookID);
+        // console.log(Book);
+        if(affectedRows == 1){
+            res.status(200).json({ "success": "Book deleted succesffuly" });       
+        }
+        else{
+            res.status(200).json({ "warning": affectedRows + " books were deleted" });       
+        }
 
-    //TODO: validBook
-    
-    //if valid data type, attempt delete book
-    //db.deleteBook(bookID)
-
-    //on success
-    res.status(200).json({ 'message': 'Book successfully deleted' });
-
-    // on failure
-    res.status(400).json({"error": "Invalid Params"});
+        //on success
+    } catch (error) {
+        console.log(error)
+        // on failure
+        res.status(500).json({"error": "Unexpected server error"});
+    }
 });
 
 
