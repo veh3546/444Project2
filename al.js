@@ -1,13 +1,12 @@
 import *  as db from './db.js';
 import * as bus from './bus.js';
-const express = require('express');
-const path = require('path');
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
 const app = express();
 const port = 5000;
 
 // ********************* MIDDLEWARE *************************
-
-const cors = require('cors');
 
 app.use(cors({
   origin: 'http://localhost:3000', // Replace with your frontend URL
@@ -16,9 +15,9 @@ app.use(cors({
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-
+const currentDir = import.meta.dirname;
 // Serve static files from React build
-app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+app.use(express.static(path.join(currentDir, 'frontend', 'build')));
 
 // ************************** GET *************************
 app.get('/api/message', async (req, res) => {
@@ -222,8 +221,8 @@ app.get('/userLoaned', async (req, res) => {
  */
 app.post('/login', async (req, res) => {
     // Gets the userID, -1 if undefined
-    const username = req.query.username != undefined ? req.query.username : null;
-    const password = req.query.password != undefined ? req.query.password : null;
+    const username = req.body.username != undefined ? req.body.username : null;
+    const password = req.body.password != undefined ? req.body.password : null;
     // console.log(username, password);
 
     //TODO: check if valid data Type (string)

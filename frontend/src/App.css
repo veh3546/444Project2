@@ -29,7 +29,41 @@ nav {
   column-gap: 5vw;
 }
 
-nav a{
+nav a {
   text-decoration: none;
   color: black;
+}
+/* login page styles */
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 5vh;
+  background-color: #cce2da;
+  width: 30vw;
+  margin: 25vh auto;
+  padding: 10vh;
+  border-radius: 30px;
+}
+
+form p {
+  font-style: italic;
+}
+
+.login-input {
+  border-radius: 10px;
+  padding: 12px;
+  width: 70%;
+  background-color: #7fbfa8;
+  border: none;
+  outline: none;
+}
+form button {
+  border-radius: 30px;
+  padding: 12px;
+  background-color: #7fbfa8;
+  border: none;
+  outline: none;
+  width: 25%;
 }

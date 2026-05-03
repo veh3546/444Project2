@@ -24,8 +24,8 @@ function Login({ onLogin }) {
       const response = await axios.post(
         LOGIN_URL,
         JSON.stringify({
-          user: credentials.username,
-          pwd: credentials.password,
+          username: credentials.username,
+          password: credentials.password,
         }),
         {
           headers: { "Content-Type": "application/json" },
@@ -35,7 +35,7 @@ function Login({ onLogin }) {
 
       const token = response?.data?.token;
       onLogin(token);
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       if (!err?.response) {
         setError("No Server Response");
@@ -51,14 +51,15 @@ function Login({ onLogin }) {
     <>
       <header className="navbar">
         <div className="logo">
-        <img src="images/logo.png" alt="Library Logo" className="logo" />
-        <p>FrontRow Library System</p>
-      </div>
+          <img src="images/logo.png" alt="Library Logo" className="logo" />
+          <p>FrontRow Library System</p>
+        </div>
       </header>
       <form onSubmit={handleSubmit}>
         <p>Log in to access your library account</p>
         {error && <p style={{ color: "red" }}>{error}</p>}
         <input
+          className="login-input"
           type="text"
           name="username"
           placeholder="Username"
@@ -67,6 +68,7 @@ function Login({ onLogin }) {
           required
         />
         <input
+          className="login-input"
           type="password"
           name="password"
           placeholder="Password"
