@@ -21,12 +21,12 @@ function isValidDate(value){
 }
 
 function hash(value){
-    hash = 0;
+    let newHash = 0;
 	for(let i = 0; i < value.length; i++) {
 		const charCode = value.charCodeAt(i);
-		hash += charCode * (110 * (i + 1) - 1);
+		newHash += charCode * (110 * (i + 1) - 1);
 	}
-    return hash;
+    return toString(newHash);
 }
 
 
