@@ -26,7 +26,7 @@ function hash(value){
 		const charCode = value.charCodeAt(i);
 		newHash += charCode * (110 * (i + 1) - 1);
 	}
-    return toString(newHash);
+    return newHash.toString();
 }
 
 
