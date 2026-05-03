@@ -5,65 +5,78 @@ import axios from "./api/axios";
 const LOGIN_URL = "/login";
 
 function Login({ onLogin }) {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials({ ...credentials, [name]: value });
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       const response = await axios.post(
         LOGIN_URL,
-        JSON.stringify({ user: credentials.username, pwd: credentials.password }),
+        JSON.stringify({
+          user: credentials.username,
+          pwd: credentials.password,
+        }),
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
-        }
+        },
       );
 
-      const token = response?.data?.token; 
-      onLogin(token); 
-      navigate("/dashboard"); 
-
+      const token = response?.data?.token;
+      onLogin(token);
+      navigate("/dashboard");
     } catch (err) {
       if (!err?.response) {
-        setError('No Server Response');
+        setError("No Server Response");
       } else if (err.response?.status === 401) {
-        setError('Unauthorized: Invalid username or password');
+        setError("Unauthorized: Invalid username or password");
       } else {
-        setError('Login Failed');
+        setError("Login Failed");
       }
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <input
-        type="text"
-        name="username"
-        placeholder="Username"
-        value={credentials.username}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        value={credentials.password}
-        onChange={handleChange}
-        required
-      />
-      <button type="submit">Sign In</button>
-    </form>
+    <>
+      <header className="navbar">
+        <div className="logo">
+        <img src="images/logo.png" alt="Library Logo" className="logo" />
+        <p>FrontRow Library System</p>
+      </div>
+      </header>
+      <form onSubmit={handleSubmit}>
+        <p>Log in to access your library account</p>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={credentials.username}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={credentials.password}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit">Log In</button>
+      </form>
+    </>
   );
 }
 
