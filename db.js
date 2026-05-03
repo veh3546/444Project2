@@ -46,7 +46,7 @@ async function getAllBooks() {
 // 6. Get all books loaned to a user by userID
 async function getBooksByUser(userId) {
      const [results, field] = await connection.query(
-        'SELECT b.*, l.loan_date, l.due_date FROM book b JOIN loan l ON b.book_id = l.book_id WHERE l.user_id = ? AND l.status = "active"',
+        'SELECT b.*, CAST(l.loan_date AS CHAR) as loan_date, CAST(l.due_date AS CHAR) as due_date FROM book b JOIN loan l ON b.book_id = l.book_id WHERE l.user_id = ? AND l.status = "active"',
         [userId]
     );
     return results;
@@ -76,8 +76,12 @@ async function updateBook(bookId, book) {
 }
 
 // 10. Add a loan
-async function addLoan(bookID, userID, due_date) {
-     const [results, field] = await connection.query('INSERT INTO loan (book_id, user_id, due_date) VALUES (?, ?, ?)', [bookID, userID, due_date]);
+async function addLoan(bookID, userID) {
+     const today = new Date().toISOString().split('T')[0];
+     let due_date = new Date(today);
+     due_date.setDate(due_date.getDate() + 30); // 30 days from now
+     due_date = due_date.toISOString().split('T')[0];
+     const [results, field] = await connection.query('INSERT INTO loan (book_id, user_id, loan_date, due_date) VALUES (?, ?, ?, ?)', [bookID, userID, today, due_date]);
      return results.insertId;
 }
 

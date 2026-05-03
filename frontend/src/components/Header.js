@@ -1,9 +1,16 @@
 // src/components/Header.js
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
 
-const Header = () => {
+const Header = ({ onLogout }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    onLogout();
+    navigate("/login");
+  };
+
   return (
     <header className="navbar">
       <div className="logo">
@@ -13,7 +20,7 @@ const Header = () => {
       <nav>
         <Link to="/home">Home</Link>
         <Link to="/loans">My Loans</Link>
-        <Link to="/logout">Log Out</Link>
+        <button onClick={handleLogout} className="logout-btn">Log Out</button>
       </nav>
     </header>
   );

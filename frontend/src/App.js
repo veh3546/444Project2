@@ -1,6 +1,6 @@
 import Login from "./Login";
-import { Routes, Route } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
 import {jwtDecode} from "jwt-decode";
 import Layout from "./components/Layout";
 import Home from "./Home";
@@ -14,25 +14,45 @@ function App() {
     setToken(newToken);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("userToken");
+    setToken(null);
+  };
+
   const userID = useMemo(() => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
+        // Check if token is expired
+        if (decoded.exp * 1000 < Date.now()) {
+          handleLogout();
+          return null;
+        }
         return decoded.userID;
       } catch (err) {
         console.error("Invalid token", err);
+        handleLogout();
         return null;
       }
     }
     return null;
   }, [token]);
 
+  // Protected Route component
+  const ProtectedRoute = ({ children }) => {
+    if (!token || !userID) {
+      return <Navigate to="/login" replace />;
+    }
+    return children;
+  };
+
   return (
     <Routes>
       <Route path="/login" element={<Login onLogin={handleLogin} />} />
-      <Route element={<Layout />}>
-        <Route path="/home" element={<Home userID={userID} />} />
-        <Route path="/loans" element={<Loans userID={userID} />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route element={<Layout onLogout={handleLogout} />}>
+        <Route path="/home" element={<ProtectedRoute><Home userID={userID} /></ProtectedRoute>} />
+        <Route path="/loans" element={<ProtectedRoute><Loans userID={userID} /></ProtectedRoute>} />
       </Route>
     </Routes>
   );

@@ -1,6 +1,52 @@
 import { useEffect, useState } from "react";
 import axios from "./api/axios";
 
+const formatDate = (dateValue) => {
+  if (!dateValue) return "Unknown";
+  
+  try {
+    let date;
+    
+    // If it's a string, try various parsing methods
+    if (typeof dateValue === 'string') {
+      // Try ISO format first (with or without time)
+      if (dateValue.includes('T')) {
+        // ISO format: 2026-05-03T10:30:00Z
+        date = new Date(dateValue);
+      } else if (dateValue.includes('-')) {
+        // YYYY-MM-DD format
+        const [year, month, day] = dateValue.split('-').map(Number);
+        // Create date in UTC to avoid timezone shifts
+        date = new Date(Date.UTC(year, month - 1, day));
+      } else if (dateValue.includes('/')) {
+        // MM/DD/YYYY format
+        date = new Date(dateValue);
+      } else {
+        // Try parsing as-is
+        date = new Date(dateValue);
+      }
+    } else if (typeof dateValue === 'number') {
+      // Timestamp
+      date = new Date(dateValue);
+    } else if (dateValue instanceof Date) {
+      date = dateValue;
+    } else {
+      return "Unknown";
+    }
+    
+    // Verify the date is valid
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid date value:", dateValue);
+      return "Unknown";
+    }
+    
+    return date.toLocaleDateString();
+  } catch (err) {
+    console.error("Error formatting date:", dateValue, err);
+    return "Unknown";
+  }
+};
+
 const Loans = ({ userID }) => {
   const [loanedBooks, setLoanedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,10 +60,11 @@ const Loans = ({ userID }) => {
     }
 
     try {
-      const response = await axios.get(`/userLoaned?userID=${userID}`);
+      const response = await axios.get("/userLoaned");
       const data = response.data;
 
       if (Array.isArray(data.userBooks)) {
+        console.log("Loaned books data:", data.userBooks);
         setLoanedBooks(data.userBooks);
       } else {
         setLoanedBooks([]);
@@ -40,7 +87,6 @@ const Loans = ({ userID }) => {
     try {
       const response = await axios.put("/loanBook", {
         bookID: bookID,
-        userID: userID,
         dateParam: new Date().toISOString().split('T')[0]
       });
 
@@ -76,8 +122,8 @@ const Loans = ({ userID }) => {
                 </h2>
               </div>
               <p>Genre: {book.genre}</p>
-              <p>Loaned on: {new Date(book.loan_date).toLocaleDateString()}</p>
-              <p>Due date: {new Date(book.due_date).toLocaleDateString()}</p>
+              <p>Loaned on: {formatDate(book.loan_date)}</p>
+              <p>Due date: {formatDate(book.due_date)}</p>
               <button
                 className="return-button"
                 onClick={() => handleReturnBook(book.book_id)}

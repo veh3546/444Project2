@@ -54,7 +54,6 @@ const Home = ({ userID }) => {
     try {
       const response = await axios.put("/loanBook", {
         bookID: selectedBook.book_id,
-        userID: userID,
         dateParam: new Date().toISOString().split('T')[0]
       });
 

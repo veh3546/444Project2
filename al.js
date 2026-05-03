@@ -22,6 +22,24 @@ const currentDir = import.meta.dirname;
 // Serve static files from React build
 app.use(express.static(path.join(currentDir, 'frontend', 'build')));
 
+// JWT verification middleware
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.userID = decoded.userID;
+    next();
+  });
+};
+
 // ************************** GET *************************
 app.get('/api/message', async (req, res) => {
   res.send('Hello World!');
@@ -177,22 +195,15 @@ app.get('/allBooks', async (req, res) => {
 
 
 /**
- * The get method to return all books loaned by a given user
+ * The get method to return all books loaned by the logged-in user
  * 
- * EX. http://localhost:3000/userLoaned?userID='1'
+ * EX. http://localhost:3000/userLoaned
  * 
- * @param userID - the users userID
  */
-app.get('/userLoaned', async (req, res) => {
-    // Gets the userID, -1 if undefined
-    const userID = req.query.userID != undefined ? req.query.userID : -1;
+app.get('/userLoaned', verifyToken, async (req, res) => {
+    // Gets the userID from token
+    const userID = req.userID;
     // console.log(userID);
-
-    //TODO: check if valid data Type (int)
-    if(userID == -1 || bus.isNum(userID) != true){
-        res.status(400).json({"error": "Invalid Params"});
-        return;
-    }
     
     //if valid data type, attempt to get all book loaned from given user
     try {
@@ -279,7 +290,7 @@ app.post('/login', async (req, res) => {
     }
  * 
  */
-app.post('/add', async (req, res) => {
+app.post('/add', verifyToken, async (req, res) => {
 
     // Gets the params
     const { title, author, description, genre, year_published, publisher } = req.body
@@ -348,7 +359,7 @@ app.post('/add', async (req, res) => {
     }
  * 
  */
-app.put('/updateBook', async (req, res) => {
+app.put('/updateBook', verifyToken, async (req, res) => {
 
     // Gets the params
     const { bookID, title, author, description, genre, year_published, publisher } = req.body
@@ -414,16 +425,17 @@ app.put('/updateBook', async (req, res) => {
  *  'dateParam' : '2026-05-15'
  * }
  */
-app.put('/loanBook', async (req, res) => {
+app.put('/loanBook', verifyToken, async (req, res) => {
 
     // Gets the params
- const { bookID, userID, dateParam } = req.body
+ const { bookID, dateParam } = req.body
+ const userID = req.userID; // From JWT
     // console.log(booID, dateParam);
 
     //TODO: check if valid data Types
     //year_published & publisher & bookID
     try {
-        if(bus.isNum(bookID) != true || bus.isNum(userID) != true || bus.isValidDate(dateParam) != true){
+        if(bus.isNum(bookID) != true || bus.isValidDate(dateParam) != true){
             res.status(400).json({"error": "Invalid Params"});
             return;
         }
@@ -433,12 +445,6 @@ app.put('/loanBook', async (req, res) => {
     }
 
     try {
-        //TODO: check if valid userID
-        const isValidUser = await db.validUser(userID);
-        if(!isValidUser){
-            res.status(400).json({"error": "Invalid Params"});
-        }
-
         //TODO: check if valid bookID
         const is_loaned = await db.validBook(bookID);
         console.log(is_loaned);
@@ -484,7 +490,7 @@ app.put('/loanBook', async (req, res) => {
  * 
  * @param bookID = the books id
  */
-app.delete('/deleteBook', async (req, res) => {
+app.delete('/deleteBook', verifyToken, async (req, res) => {
     // Gets the id or -1 if invalid
     const bookID = req.query.bookID != undefined ? req.query.bookID: -1;
     // console.log(bookID);
