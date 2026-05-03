@@ -46,7 +46,7 @@ async function getAllBooks() {
 // 6. Get all books loaned to a user by userID
 async function getBooksByUser(userId) {
      const [results, field] = await connection.query(
-        'SELECT b.* FROM book b JOIN loan l ON b.book_id = l.book_id WHERE l.user_id = ? AND l.status = "active"',
+        'SELECT b.*, l.loan_date, l.due_date FROM book b JOIN loan l ON b.book_id = l.book_id WHERE l.user_id = ? AND l.status = "active"',
         [userId]
     );
     return results;

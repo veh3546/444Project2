@@ -3,8 +3,11 @@ import * as bus from './bus.js';
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
+import jwt from 'jsonwebtoken';
+
 const app = express();
 const port = 5000;
+const JWT_SECRET = 'your-secret-key'; // TODO: Use environment variable
 
 // ********************* MIDDLEWARE *************************
 
@@ -243,18 +246,10 @@ app.post('/login', async (req, res) => {
 
         //on success
         if (loginInfo.length != 0){
+            const userID = loginInfo[0].user_id;
+            const token = jwt.sign({ userID }, JWT_SECRET, { expiresIn: '1h' });
 
-            //create sessionTOken
-            //TODO: create JWT token
-
-            //insert into db
-            //db.updateSessiontoken(sessionToken, userID);
-
-            //set token in localstorage?
-            //TODO put sessionToken somewhere to recall
-
-            //redirect to new page
-            res.status(200).json({ "success": "User succesffuly logged in" });
+            res.status(200).json({ "success": "User successfully logged in", token });
 
         }
         else{
