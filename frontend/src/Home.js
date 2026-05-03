@@ -8,7 +8,7 @@ const Home = ({ userID }) => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loanMessage, setLoanMessage] = useState("");
-
+  // get all books from backend
   const fetchBooks = async () => {
     try {
       const response = await axios.get("/allBooks");
@@ -54,7 +54,7 @@ const Home = ({ userID }) => {
     try {
       const response = await axios.put("/loanBook", {
         bookID: selectedBook.book_id,
-        dateParam: new Date().toISOString().split('T')[0]
+        dateParam: new Date().toISOString().split("T")[0],
       });
 
       if (response.data.message) {
@@ -122,13 +122,29 @@ const Home = ({ userID }) => {
               </button>
             </div>
             <div className="modal-body">
-              <p><strong>Title:</strong> {selectedBook.title}</p>
-              <p><strong>Author:</strong> {selectedBook.author}</p>
-              <p><strong>Genre:</strong> {selectedBook.genre}</p>
-              <p><strong>Description:</strong> {selectedBook.description || "No description available."}</p>
-              <p><strong>Year Published:</strong> {selectedBook.year_published}</p>
-              <p><strong>Publisher:</strong> {selectedBook.publisher}</p>
-              <p><strong>Status:</strong> {selectedBook.is_loaned === 0 ? "Available" : "Loaned"}</p>
+              <p>
+                <strong>Title:</strong> {selectedBook.title}
+              </p>
+              <p>
+                <strong>Author:</strong> {selectedBook.author}
+              </p>
+              <p>
+                <strong>Genre:</strong> {selectedBook.genre}
+              </p>
+              <p>
+                <strong>Description:</strong>{" "}
+                {selectedBook.description || "No description available."}
+              </p>
+              <p>
+                <strong>Year Published:</strong> {selectedBook.year_published}
+              </p>
+              <p>
+                <strong>Publisher:</strong> {selectedBook.publisher}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                {selectedBook.is_loaned === 0 ? "Available" : "Loaned"}
+              </p>
 
               {selectedBook.is_loaned === 0 && userID && (
                 <div className="loan-section">
@@ -141,7 +157,9 @@ const Home = ({ userID }) => {
               )}
 
               {loanMessage && (
-                <p className={`loan-message ${loanMessage.includes("success") || loanMessage.includes("Success") ? "success" : "error"}`}>
+                <p
+                  className={`loan-message ${loanMessage.includes("success") || loanMessage.includes("Success") ? "success" : "error"}`}
+                >
                   {loanMessage}
                 </p>
               )}

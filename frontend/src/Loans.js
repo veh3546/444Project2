@@ -3,50 +3,45 @@ import axios from "./api/axios";
 
 const formatDate = (dateValue) => {
   if (!dateValue) return "Unknown";
-  
+
   try {
     let date;
-    
-    // If it's a string, try various parsing methods
-    if (typeof dateValue === 'string') {
-      // Try ISO format first (with or without time)
-      if (dateValue.includes('T')) {
+    if (typeof dateValue === "string") {
+      if (dateValue.includes("T")) {
         // ISO format: 2026-05-03T10:30:00Z
         date = new Date(dateValue);
-      } else if (dateValue.includes('-')) {
+      } else if (dateValue.includes("-")) {
         // YYYY-MM-DD format
-        const [year, month, day] = dateValue.split('-').map(Number);
+        const [year, month, day] = dateValue.split("-").map(Number);
         // Create date in UTC to avoid timezone shifts
         date = new Date(Date.UTC(year, month - 1, day));
-      } else if (dateValue.includes('/')) {
+      } else if (dateValue.includes("/")) {
         // MM/DD/YYYY format
         date = new Date(dateValue);
       } else {
-        // Try parsing as-is
         date = new Date(dateValue);
       }
-    } else if (typeof dateValue === 'number') {
-      // Timestamp
+    } else if (typeof dateValue === "number") {
       date = new Date(dateValue);
     } else if (dateValue instanceof Date) {
       date = dateValue;
     } else {
       return "Unknown";
     }
-    
+
     // Verify the date is valid
     if (isNaN(date.getTime())) {
       console.warn("Invalid date value:", dateValue);
       return "Unknown";
     }
-    
+
     return date.toLocaleDateString();
   } catch (err) {
     console.error("Error formatting date:", dateValue, err);
     return "Unknown";
   }
 };
-
+// Loans page component
 const Loans = ({ userID }) => {
   const [loanedBooks, setLoanedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +82,7 @@ const Loans = ({ userID }) => {
     try {
       const response = await axios.put("/loanBook", {
         bookID: bookID,
-        dateParam: new Date().toISOString().split('T')[0]
+        dateParam: new Date().toISOString().split("T")[0],
       });
 
       if (response.data.message) {
@@ -103,7 +98,7 @@ const Loans = ({ userID }) => {
     <div className="loans-page">
       <header className="home-header">
         <h1>My Loans</h1>
-        <p>Books you have currently loaned from the library.</p>
+        <p>Books you have currently loaned from the library:</p>
       </header>
 
       {loading ? (

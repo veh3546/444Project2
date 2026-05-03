@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"; // Fix 1: Import added
 import axios from "./api/axios";
 
 const LOGIN_URL = "/login";
-
 function Login({ onLogin }) {
   const [credentials, setCredentials] = useState({
     username: "",
@@ -16,7 +15,7 @@ function Login({ onLogin }) {
     const { name, value } = e.target;
     setCredentials({ ...credentials, [name]: value });
   };
-
+  // login submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -32,7 +31,7 @@ function Login({ onLogin }) {
           withCredentials: true,
         },
       );
-
+      // login successful, extract token and pass to App
       const token = response?.data?.token;
       onLogin(token);
       navigate("/home");

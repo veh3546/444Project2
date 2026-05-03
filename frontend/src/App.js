@@ -1,7 +1,7 @@
 import Login from "./Login";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import Layout from "./components/Layout";
 import Home from "./Home";
 import Loans from "./Loans";
@@ -51,8 +51,22 @@ function App() {
       <Route path="/login" element={<Login onLogin={handleLogin} />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route element={<Layout onLogout={handleLogout} />}>
-        <Route path="/home" element={<ProtectedRoute><Home userID={userID} /></ProtectedRoute>} />
-        <Route path="/loans" element={<ProtectedRoute><Loans userID={userID} /></ProtectedRoute>} />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home userID={userID} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/loans"
+          element={
+            <ProtectedRoute>
+              <Loans userID={userID} />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   );
