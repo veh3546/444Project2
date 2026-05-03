@@ -1,16 +1,47 @@
-import express from 'express';
 import *  as db from './db.js';
 import * as bus from './bus.js';
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import jwt from 'jsonwebtoken';
+
 const app = express();
-const port = 3000;
+const port = 5000;
+const JWT_SECRET = 'your-secret-key'; // TODO: Use environment variable
 
 // ********************* MIDDLEWARE *************************
 
+app.use(cors({
+  origin: 'http://localhost:3000', // Replace with your frontend URL
+  credentials: true
+}));
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+const currentDir = import.meta.dirname;
+// Serve static files from React build
+app.use(express.static(path.join(currentDir, 'frontend', 'build')));
+
+// JWT verification middleware
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.userID = decoded.userID;
+    next();
+  });
+};
+
 // ************************** GET *************************
-app.get('/', async (req, res) => {
+app.get('/api/message', async (req, res) => {
   res.send('Hello World!');
 });
 
@@ -164,22 +195,15 @@ app.get('/allBooks', async (req, res) => {
 
 
 /**
- * The get method to return all books loaned by a given user
+ * The get method to return all books loaned by the logged-in user
  * 
- * EX. http://localhost:3000/userLoaned?userID='1'
+ * EX. http://localhost:3000/userLoaned
  * 
- * @param userID - the users userID
  */
-app.get('/userLoaned', async (req, res) => {
-    // Gets the userID, -1 if undefined
-    const userID = req.query.userID != undefined ? req.query.userID : -1;
+app.get('/userLoaned', verifyToken, async (req, res) => {
+    // Gets the userID from token
+    const userID = req.userID;
     // console.log(userID);
-
-    //TODO: check if valid data Type (int)
-    if(userID == -1 || bus.isNum(userID) != true){
-        res.status(400).json({"error": "Invalid Params"});
-        return;
-    }
     
     //if valid data type, attempt to get all book loaned from given user
     try {
@@ -209,10 +233,10 @@ app.get('/userLoaned', async (req, res) => {
  * @param username - the username of the user
  * @param password - the password of the user
  */
-app.get('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     // Gets the userID, -1 if undefined
-    const username = req.query.username != undefined ? req.query.username : null;
-    const password = req.query.password != undefined ? req.query.password : null;
+    const username = req.body.username != undefined ? req.body.username : null;
+    const password = req.body.password != undefined ? req.body.password : null;
     // console.log(username, password);
 
     //TODO: check if valid data Type (string)
@@ -233,18 +257,10 @@ app.get('/login', async (req, res) => {
 
         //on success
         if (loginInfo.length != 0){
+            const userID = loginInfo[0].user_id;
+            const token = jwt.sign({ userID }, JWT_SECRET, { expiresIn: '1h' });
 
-            //create sessionTOken
-            //TODO: create JWT token
-
-            //insert into db
-            //db.updateSessiontoken(sessionToken, userID);
-
-            //set token in localstorage?
-            //TODO put sessionToken somewhere to recall
-
-            //redirect to new page
-            res.status(200).json({ "success": "User succesffuly logged in" });
+            res.status(200).json({ "success": "User successfully logged in", token });
 
         }
         else{
@@ -274,7 +290,7 @@ app.get('/login', async (req, res) => {
     }
  * 
  */
-app.post('/add', async (req, res) => {
+app.post('/add', verifyToken, async (req, res) => {
 
     // Gets the params
     const { title, author, description, genre, year_published, publisher } = req.body
@@ -343,7 +359,7 @@ app.post('/add', async (req, res) => {
     }
  * 
  */
-app.put('/updateBook', async (req, res) => {
+app.put('/updateBook', verifyToken, async (req, res) => {
 
     // Gets the params
     const { bookID, title, author, description, genre, year_published, publisher } = req.body
@@ -409,16 +425,17 @@ app.put('/updateBook', async (req, res) => {
  *  'dateParam' : '2026-05-15'
  * }
  */
-app.put('/loanBook', async (req, res) => {
+app.put('/loanBook', verifyToken, async (req, res) => {
 
     // Gets the params
- const { bookID, userID, dateParam } = req.body
+ const { bookID, dateParam } = req.body
+ const userID = req.userID; // From JWT
     // console.log(booID, dateParam);
 
     //TODO: check if valid data Types
     //year_published & publisher & bookID
     try {
-        if(bus.isNum(bookID) != true || bus.isNum(userID) != true || bus.isValidDate(dateParam) != true){
+        if(bus.isNum(bookID) != true || bus.isValidDate(dateParam) != true){
             res.status(400).json({"error": "Invalid Params"});
             return;
         }
@@ -428,12 +445,6 @@ app.put('/loanBook', async (req, res) => {
     }
 
     try {
-        //TODO: check if valid userID
-        const isValidUser = await db.validUser(userID);
-        if(!isValidUser){
-            res.status(400).json({"error": "Invalid Params"});
-        }
-
         //TODO: check if valid bookID
         const is_loaned = await db.validBook(bookID);
         console.log(is_loaned);
@@ -479,7 +490,7 @@ app.put('/loanBook', async (req, res) => {
  * 
  * @param bookID = the books id
  */
-app.delete('/deleteBook', async (req, res) => {
+app.delete('/deleteBook', verifyToken, async (req, res) => {
     // Gets the id or -1 if invalid
     const bookID = req.query.bookID != undefined ? req.query.bookID: -1;
     // console.log(bookID);
@@ -513,5 +524,5 @@ app.delete('/deleteBook', async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });

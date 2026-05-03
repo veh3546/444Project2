@@ -1,38 +1,293 @@
-.App {
-  text-align: center;
+/* header styles */
+.navbar {
+  background-color: #cce2da;
+  display: flex;
+  padding: 20px;
+  margin-top: 0px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  gap: 20px;
+  font-weight: bold;
+  font-size: large;
+  justify-content: space-between;
+}
+.navbar img {
+  height: 60px;
+  margin-right: 10px;
+}
+.logo {
+  display: flex;
+  align-items: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+nav {
+  align-items: center;
+  margin-right: 5vw;
+  display: flex;
+  column-gap: 5vw;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+nav a {
+  text-decoration: none;
+  color: black;
+}
+/* login page styles */
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 5vh;
+  background-color: #cce2da;
+  width: 30vw;
+  margin: 25vh auto;
+  padding: 10vh;
+  border-radius: 30px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+form p {
+  font-style: italic;
+}
+
+.login-input {
+  border-radius: 10px;
+  padding: 12px;
+  width: 70%;
+  background-color: #7fbfa8;
+  border: none;
+  outline: none;
+}
+form button {
+  border-radius: 30px;
+  padding: 12px;
+  background-color: #7fbfa8;
+  border: none;
+  outline: none;
+  width: 25%;
+}
+
+.logout-btn {
+  border: none;
+  color: black;
+  background: none;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+}
+/* home page styles */
+.home-page {
+  max-width: 70vw;
+  margin: 20vh auto;
+}
+
+.book-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(70vw, 1fr));
+}
+
+.book-card {
+  background: #cce2da;
+  border: 1px solid #7fbfa8;
+  border-radius: 10px;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 1rem;
+}
+
+.book-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.book-card h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.book-card p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.status {
+  font-size: 0.9rem;
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+}
+
+.status.available {
+  background-color: #139969;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.status.loaned {
+  background-color: #991313;
+  color: white;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #154737;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-body p {
+  margin: 0.75rem 0;
+  line-height: 1.6;
+}
+
+.loan-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.loan-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #154737;
+}
+
+.loan-section input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.loan-section button {
+  background-color: #7fbfa8;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.loan-message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.loan-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.loan-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Loan page styles */
+.loans-page {
+  max-width: 70vw;
+  margin: 20vh auto;
+}
+
+.loan-card {
+  background: #cce2da;
+  border: 1px solid #7fbfa8;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loan-card h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.loan-card p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.return-button {
+  background-color: #991313;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
+.return-button:hover {
+  background-color: #d71f1f;
 }
