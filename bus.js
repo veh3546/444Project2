@@ -1,4 +1,3 @@
-
 function isNum(value){
     if(typeof value == "number") {
         return Number.isInteger(value);
@@ -6,8 +5,9 @@ function isNum(value){
         // if inputted as a string, test if the string only contains digits
         let pattern = /\D/g;
         return !pattern.test(value);
+    } else {
+        return false;
     }
-    return true;
 }
 
 function isString(value){
