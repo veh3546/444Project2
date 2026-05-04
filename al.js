@@ -4,12 +4,30 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
+import fs from 'fs/promises';
 
 const app = express();
 const port = 5000;
 const JWT_SECRET = 'your-secret-key'; // TODO: Use environment variable
 
 // ********************* MIDDLEWARE *************************
+//ATTEMPT ON FIXING CORS
+// app.use((req, res, next) =>{
+//     res.setHeader("Access-Control-Allow-Origin", '*');
+//     res.setHeader("Access-Control-Allow-Methods", 'GET, POST, PUT, DELETE, OPTIONS');
+//     res.setHeader("Access-Control-Allow-Origin", 'Content-Type');
+//     if (req.method === "OPTIONS"){
+//         return res.sendStatus(204);
+//     }
+//     next();
+// });
+
+
+//Logs out the paths
+app.use((req, res, next)=>{
+    fs.appendFile('logs/filestream.txt',`${Date()}:  ${req.path}\n`);
+    next();
+});
 
 app.use(cors({
   origin: 'http://localhost:3000', // Replace with your frontend URL
@@ -73,6 +91,7 @@ app.get('/book', async (req, res) => {
     } catch (error) {
 
         // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "Unexpected server error"});
     }
 });
@@ -110,6 +129,7 @@ app.get('/genre', async (req, res) => {
         res.status(200).json({ genreBooks });       
     } catch (error) {
         // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "Unexpected server error"});
     }
 });
@@ -137,6 +157,7 @@ app.get('/loaned', async (req, res) => {
         }
     } catch (error) {
     // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "An unexpected error occured"});
     }
 });
@@ -163,6 +184,7 @@ app.get('/free', async (req, res) => {
         }
     } catch (error) {
     // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "An unexpected error occured"});
     }
 });
@@ -189,6 +211,7 @@ app.get('/allBooks', async (req, res) => {
         }
     } catch (error) {
     // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "An unexpected error occured"});
     }
 });
@@ -208,6 +231,8 @@ app.get('/userLoaned', verifyToken, async (req, res) => {
     //if valid data type, attempt to get all book loaned from given user
     try {
         const userBooks = await db.getBooksByUser(userID);
+        fs.appendFile('logs/actions.txt',`${Date()}:  User:${userID} checked their loaned books\n`);
+
                 
         //if no loaned books
         if(userBooks.length == 0){
@@ -220,7 +245,9 @@ app.get('/userLoaned', verifyToken, async (req, res) => {
     } catch (error) {
         
         // on failure
-        res.status(400).json({"error": "Invalid Params"});
+        res.status(400).json({"error": "Unexpected error occured"});
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
+
     }
 });
 
@@ -260,14 +287,19 @@ app.post('/login', async (req, res) => {
             const userID = loginInfo[0].user_id;
             const token = jwt.sign({ userID }, JWT_SECRET, { expiresIn: '1h' });
 
+            //log success
+            fs.appendFile('logs/actions.txt',`${Date()}:  User:${userID} has logged in\n`);
+
             res.status(200).json({ "success": "User successfully logged in", token });
 
         }
         else{
             // on failure
+            fs.appendFile('logs/actions.txt',`${Date()}:  Username:${username} unsuccessfully logged in\n`);
             res.status(400).json({"error": "Invalid Login"});
         }
     } catch (error) {
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "Unexpected error"});
     } 
 });
@@ -314,6 +346,7 @@ app.post('/add', verifyToken, async (req, res) => {
             return;
         }
     } catch (error) {
+        fs.appendFile('logs/actions.txt',`${Date()}:  A book was attempted with invalid params\n`);
         res.status(400).json({"error": "Invalid Params"});
         return;
     }
@@ -332,10 +365,12 @@ app.post('/add', verifyToken, async (req, res) => {
         const bookID = await db.insertBook(book);
 
         //on success
+        fs.appendFile('logs/actions.txt',`${Date()}:  Book ID:${bookID} - ${title}, was added\n`);
         res.status(200).json({ "success": "Book added succesffuly" });
 
     } catch (error) {
         // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "An unexpected error occured"});
     }
 });
@@ -382,6 +417,7 @@ app.put('/updateBook', verifyToken, async (req, res) => {
             return;
         }
     } catch (error) {
+        fs.appendFile('logs/actions.txt',`${Date()}:  A book was attempted to be updated with invalid params\n`);
         res.status(400).json({"error": "Invalid Params"});
         return;
     }
@@ -405,10 +441,12 @@ app.put('/updateBook', verifyToken, async (req, res) => {
         }
 
         //on success
+        fs.appendFile('logs/actions.txt',`${Date()}:  Book ID:${bookID} was updated\n`);
         res.status(200).json({ "success": "Book updated succesffuly" });
 
     } catch (error) {
         // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "An unexpected error occured"});
     }
 });
@@ -463,6 +501,7 @@ app.put('/loanBook', verifyToken, async (req, res) => {
             await db.addLoan(bookID, userID, dateParam);
 
             // on success
+            fs.appendFile('logs/actions.txt',`${Date()}:  Book ID:${bookID} was successfully loaned\n`);
             res.status(200).json({ 'message': 'Book succesffuly loaned '});
         }
         else{
@@ -470,11 +509,12 @@ app.put('/loanBook', verifyToken, async (req, res) => {
             await db.deleteLoan(bookID);
 
             //on success
+            fs.appendFile('logs/actions.txt',`${Date()}:  Book ID:${bookID} was succesfull returned\n`);
             res.status(200).json({ 'message': 'Book succesffuly returned '});
         }
     } 
     catch (error) {
-        console.log(error);
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "Unexpected error occured", "e": error});
     }
 
@@ -507,6 +547,7 @@ app.delete('/deleteBook', verifyToken, async (req, res) => {
         const affectedRows = await db.deleteBook(bookID);
         // console.log(Book);
         if(affectedRows == 1){
+        fs.appendFile('logs/actions.txt',`${Date()}:  Book ID:${bookID} was deleted\n`);
             res.status(200).json({ "success": "Book deleted succesffuly" });       
         }
         else{
@@ -515,8 +556,8 @@ app.delete('/deleteBook', verifyToken, async (req, res) => {
 
         //on success
     } catch (error) {
-        console.log(error)
         // on failure
+        fs.appendFile('logs/error.txt',`${Date()}:  ${error}\n`);
         res.status(500).json({"error": "Unexpected server error"});
     }
 });
