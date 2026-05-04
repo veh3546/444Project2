@@ -1,6 +1,10 @@
 ## Stack
 We are using mySQL, Express, React, and Node as a variation of the MERN stack. This stack was chosen based on team familiarity and the preference to use one language, JavaScript, across the stack. We are using mySQL because not everyone on the team was familiar with non-relational databases like Mongo. Additionally, it makes sense for a library system to use strictly structured data relationships. We are using Node and Express because they are commonly used together for JavaScript applications. Finally, we’re using React instead of Angular because it has less bloat while still providing a framework for the frontend.
 
+## MySQL DB
+<img width="771" height="551" alt="image" src="https://github.com/user-attachments/assets/43c9e63e-ef07-41e4-b8ea-0da5b571b93e" />
+
+
 ## API
 ### GET-
 * /book?{id} - returns a book given the id
