@@ -131,6 +131,30 @@ form button {
   background-color: #991313;
   color: white;
 }
+.delete-btn, .create-cancel-btn {
+  width: fit-content;
+  padding: 0.5rem 0.85rem;
+  background-color: #991313;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+.delete-btn:hover, .create-cancel-btn:hover {
+  background-color: #d71f1f;
+}
+.create-btn, .create-create-btn {
+  width: fit-content;
+  padding: 0.5rem 0.85rem;
+  background-color: #139969;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+.create-btn:hover, .create-create-btn:hover {
+  background-color: #2cd499;
+}
+
+
 
 /* Modal styles */
 .modal-overlay {
@@ -156,7 +180,15 @@ form button {
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
-
+.create-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  width: 70vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -191,6 +223,19 @@ form button {
 
 .modal-body {
   padding: 1.5rem;
+}
+.create-modal-body form{
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem auto;
+  align-items: start;
+}
+.create-modal-body form div{
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 1rem;
 }
 
 .modal-body p {
