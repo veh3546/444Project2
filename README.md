@@ -3,23 +3,23 @@ We are using mySQL, Express, React, and Node as a variation of the MERN stack. T
 
 ## API
 ### GET-
-/book?{id}				                              -             returns a book given the id
-/genre?{genre}                                  -             returns all books in given genre
-/loaned                                         -             returned all loaned books
-/free                                           -             returns all available books
-/all                                            -             returns all books
-/user?{id}                                      -             returns all books loaned to given user
+* /book?{id} - returns a book given the id
+* /genre?{genre} - returns all books in given genre
+* /loaned - returned all loaned books
+* /free - returns all available books
+* /all - returns all books
+* /user?{id} - returns all books loaned to given user
 
 ### POST-
-/add{book}                                      -            inserts a new book into the library
-/login                                          -            attempts to login
+* /add{book} - inserts a new book into the library
+* /login - attempts to login
 
 ### PUT-
-/updateBook?{id, newBook}                       -            updates given book with new info
-/changeLoan?{bookId, userId}                    -            swaps the loan state and updates user table
+* /updateBook?{id, newBook} - updates given book with new info
+* /changeLoan?{bookId, userId} - swaps the loan state and updates user table
 
 ### DELETE-
-/delete?{id}				                            -            deletes given book
+* /delete?{id} - deletes given book
 
 
 ## To run the project:
