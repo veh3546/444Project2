@@ -19,7 +19,7 @@ VALUES ('The Hobbit', 'J.R.R. Tolkien', 'A hobbit goes on an adventure', 'Fantas
 ('Dracula', 'Bram Stoker', 'The story of the famous vampire', 'Horror', 1897, 'Archibald Constable', 0);
 
 insert into user (username, password_hash, email, full_name)
-VALUES ('test', 'pass', 'test@test.com', 'First Last');
+VALUES ('test', '112117', 'test@test.com', 'First Last');
 
 insert into loan (book_id, user_id, loan_date, due_date) VALUES
 (1, 1, '2026-05-03', '2026-05-12');
