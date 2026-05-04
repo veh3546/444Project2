@@ -8,7 +8,7 @@ VALUES(2,"test title","test author","Lorem Ipsu","Horror", 1908,"Me", 0),
 ;
 
 insert into user (user_id, username, password_hash, email, full_name)
-VALUES (1, 'test', 'pass', 'test@test.com', 'First Last');
+VALUES (1, 'test', '121771', 'test@test.com', 'First Last');
 
 insert into loan (loan_id, book_id, user_id, loan_date, due_date) VALUES
 (1, 1, 1, '2026-05-03', '2026-05-12');
